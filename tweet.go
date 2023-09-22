@@ -626,7 +626,11 @@ type TweetReply struct {
 }
 
 type PostTweetResponse struct {
-	PostTweetData PostTweetData `json:"data"`
+	PostTweetData PostTweetData             `json:"data"`
+	Errors        []*PostTweetResponseError `json:"errors,omitempty"`
+	Title         string                    `json:"title,omitempty"`
+	Detail        string                    `json:"detail,omitempty"`
+	Type          string                    `json:"type,omitempty"`
 }
 
 type PostTweetData struct {

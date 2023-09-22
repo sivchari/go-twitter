@@ -2,6 +2,7 @@ package gotwtr_test
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -54,6 +55,47 @@ func Test_postTweet(t *testing.T) {
 				},
 			},
 			wantErr: false,
+		},
+		{
+			name: "400 bad request payload",
+			args: args{
+				ctx: context.Background(),
+				client: mockHTTPClient(func(request *http.Request) *http.Response {
+					body := fmt.Sprintf(`
+												{
+														"errors": [{
+																"parameters": { 
+																		"text": ["%s"]
+																},
+																"message": "The Tweet contains an invalid URL."
+														}],
+														"title": "Invalid Request",
+														"detail": "One or more parameters to your request was invalid.",
+														"type": "https://api.twitter.com/2/problems/invalid-request"
+												}
+                    `, strings.Repeat("x", 281))
+					return &http.Response{
+						StatusCode: http.StatusBadRequest,
+						Body:       io.NopCloser(strings.NewReader(body)),
+					}
+				}),
+				body: &gotwtr.PostTweetOption{
+					Text: strings.Repeat("x", 281),
+				},
+			},
+			want: &gotwtr.PostTweetResponse{
+				Errors: []*gotwtr.PostTweetResponseError{{
+					Parameters: gotwtr.PostTweetResponseErrorParameter{
+						Text: []string{strings.Repeat("x", 281)},
+					},
+					Message: "The Tweet contains an invalid URL.",
+				},
+				},
+				Title:  "Invalid Request",
+				Detail: "One or more parameters to your request was invalid.",
+				Type:   "https://api.twitter.com/2/problems/invalid-request",
+			},
+			wantErr: true,
 		},
 	}
 	for i, tt := range tests {

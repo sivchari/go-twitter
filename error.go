@@ -34,3 +34,12 @@ type Parameter struct {
 	UserName  []string `json:"username"`
 	UserNames []string `json:"usernames"`
 }
+
+type PostTweetResponseError struct {
+	Parameters PostTweetResponseErrorParameter `json:"parameters"`
+	Message    string                          `json:"message"`
+}
+
+type PostTweetResponseErrorParameter struct {
+	Text []string `json:"text"`
+}
